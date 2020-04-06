@@ -6,7 +6,7 @@
 // @run-at      document-end
 // @include     https://www.wanikani.com/review/session*
 // @include     http://www.wanikani.com/review/session*
-// @version     1.0.25
+// @version     1.0.43
 // @run-at      document-end
 // @grant       none
 
@@ -15,48 +15,70 @@
 const SCRIPT_NAME = "Wanikani SRS Indicator";
 const CURRENT_EVENT_ITEM_UPDATE_STRING = "currentItemUpdated";
 const SRS_INDICATOR_STYLES = "xr-styles";
+const SRS_INDICATOR_CONTAINER_ID = "xr-srsindicator-container";
 const SRS_INDICATOR_DIV_ID = "xr-srsindicator-div";
-const SRS_INDICATOR_SPAN_ID = "xr-srsindicator-span";
+const SRS_INDICATOR_TEXT_DIV_ID = 'xr-srsindicatortext-div';
+const SRS_DANGER_CIRCLE_DIV_CLASS = "xr-srsdangercircle-div";
 const CASE_MAP = {
   4: {
     copy: "Guru'ing",
-    style: "",
   },
   6: {
     copy: "Master'ing",
-    style: "",
   },
   7: {
     copy: "Enlighten'ing",
-    style: "",
   },
   8: {
     copy: "Burn'ing",
-    style: "",
   },
 };
 
 // styles
-const WARNING_HEX = "#BA4E4B";
-const WARNING_HEX2 = "#B94B58";
-const NEUTRAL_BACKGROUND = "#BEB79B";
 const scriptStyles = `
- #${SRS_INDICATOR_DIV_ID} {
+ #${SRS_INDICATOR_CONTAINER_ID} {
    position: absolute;
    top: 0;
    left: 0;
    right: 0;
    margin-top: 16px;
+   display: flex;
+   justify-content: center;
  }
 
- #${SRS_INDICATOR_SPAN_ID} {
-   animation: pulse 1s infinite;
-   color: red;
+ #${SRS_INDICATOR_DIV_ID} {
    background-color: white;
    border-radius: 10px;
    padding: 4px;
  }
-
+ #${SRS_INDICATOR_TEXT_DIV_ID} {
+   display: inline-block;
+  color: red;
+ }
+ .${SRS_DANGER_CIRCLE_DIV_CLASS} {
+  animation: pulse 1s infinite;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: red;
+  display: inline-block;
+  margin: 4px;
+ }
+ @media only screen (max-width: 845px){
+  #${SRS_INDICATOR_CONTAINER_ID} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+  }
+  #${SRS_INDICATOR_DIV_ID} {
+    background-color: white;
+    border-radius: 10px;
+  }
+}
  @keyframes pulse {
    0% {
      transform: scale(0.9);
@@ -74,28 +96,41 @@ const scriptStyles = `
 
 const createCurrentItemUpdateEvent = (srsLevelNumber) =>
   new CustomEvent(CURRENT_EVENT_ITEM_UPDATE_STRING, {
-    detail: { srsLevelNumber },
+    detail: {
+      srsLevelNumber
+    },
   });
 
 const getOrCreateSRSIndicatorNode = (srsLevelNumber) => {
-  let srsIndicatorDivNode = document.getElementById(SRS_INDICATOR_DIV_ID);
-  if (srsIndicatorDivNode) {
-    return srsIndicatorDivNode;
+  let srsIndicatorContainer = document.getElementById(SRS_INDICATOR_CONTAINER_ID);
+  if (srsIndicatorContainer) {
+    return srsIndicatorContainer;
   }
   // create srs indicator components
-  srsIndicatorDivNode = document.createElement("div");
-  const srsIndicatorSpan = document.createElement("span");
-  const srsIndicatorTextNode = document.createTextNode("");
+  srsIndicatorContainer = document.createElement("div");
+  const srsDangerCircleSpanOne = document.createElement('div');
+  const srsDangerCircleSpanTwo = document.createElement('div');
+
+  const srsIndicatorDiv = document.createElement("div");
+  const srsIndicatorSpan = document.createElement('div');
+
   // set ids for style
-  srsIndicatorDivNode.setAttribute("id", SRS_INDICATOR_DIV_ID);
-  srsIndicatorSpan.setAttribute("id", SRS_INDICATOR_SPAN_ID);
+  srsIndicatorContainer.setAttribute("id", SRS_INDICATOR_CONTAINER_ID);
+  srsIndicatorDiv.setAttribute("id", SRS_INDICATOR_DIV_ID);
+  srsIndicatorSpan.setAttribute('id', SRS_INDICATOR_TEXT_DIV_ID);
+  // set classes on danger circles
+  srsDangerCircleSpanOne.setAttribute('class', SRS_DANGER_CIRCLE_DIV_CLASS);
+  srsDangerCircleSpanTwo.setAttribute('class', SRS_DANGER_CIRCLE_DIV_CLASS);
 
   // combine
-  srsIndicatorSpan.appendChild(srsIndicatorTextNode);
-  srsIndicatorDivNode.appendChild(srsIndicatorSpan);
+  srsIndicatorDiv.appendChild(srsDangerCircleSpanOne);
+  srsIndicatorDiv.appendChild(srsIndicatorSpan);
+  srsIndicatorDiv.appendChild(srsDangerCircleSpanTwo);
+
+  srsIndicatorContainer.appendChild(srsIndicatorDiv);
 
   // return parent node
-  return srsIndicatorDivNode;
+  return srsIndicatorContainer;
 };
 
 const addScriptStyles = () => {
@@ -112,11 +147,11 @@ const main = () => {
   targetParent.addEventListener(CURRENT_EVENT_ITEM_UPDATE_STRING, (e) => {
     // remove node if it exists
     if (!CASE_MAP[e.detail.srsLevelNumber]) {
-      const srsIndicatorDivNode = document.getElementById(SRS_INDICATOR_DIV_ID);
+      const srsIndicatorDivNode = document.getElementById(SRS_INDICATOR_CONTAINER_ID);
       return srsIndicatorDivNode && srsIndicatorDivNode.remove();
     }
     const srsIndicatorDivNode = getOrCreateSRSIndicatorNode();
-    srsIndicatorDivNode.children[0].textContent =
+    srsIndicatorDivNode.children[0].children[1].textContent =
       CASE_MAP[e.detail.srsLevelNumber].copy;
     targetParent.appendChild(srsIndicatorDivNode);
   });
@@ -126,7 +161,7 @@ const main = () => {
   });
   // add styles
   addScriptStyles();
-  // kick off script
+  // kick off script for initial element
   targetParent.dispatchEvent(
     createCurrentItemUpdateEvent(currentReviewItem.srs)
   );
