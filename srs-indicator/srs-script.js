@@ -6,7 +6,7 @@
 // @run-at      document-end
 // @include     https://www.wanikani.com/review/session*
 // @include     http://www.wanikani.com/review/session*
-// @version     1.0.43
+// @version     1.1.0
 // @run-at      document-end
 // @grant       none
 
@@ -64,21 +64,6 @@ const scriptStyles = `
   display: inline-block;
   margin: 4px;
  }
- @media only screen (max-width: 845px){
-  #${SRS_INDICATOR_CONTAINER_ID} {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-  }
-  #${SRS_INDICATOR_DIV_ID} {
-    background-color: white;
-    border-radius: 10px;
-  }
-}
  @keyframes pulse {
    0% {
      transform: scale(0.9);
