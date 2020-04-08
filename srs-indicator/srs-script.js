@@ -6,7 +6,7 @@
 // @run-at      document-end
 // @include     https://www.wanikani.com/review/session*
 // @include     http://www.wanikani.com/review/session*
-// @version     1.1.0
+// @version     1.1.2
 // @run-at      document-end
 // @grant       none
 
@@ -21,16 +21,16 @@ const SRS_INDICATOR_TEXT_DIV_ID = 'xr-srsindicatortext-div';
 const SRS_DANGER_CIRCLE_DIV_CLASS = "xr-srsdangercircle-div";
 const CASE_MAP = {
   4: {
-    copy: "Guru'ing",
+    copy: "Guruing",
   },
   6: {
-    copy: "Master'ing",
+    copy: "Mastering",
   },
   7: {
-    copy: "Enlighten'ing",
+    copy: "Enlightening",
   },
   8: {
-    copy: "Burn'ing",
+    copy: "Burning",
   },
 };
 
