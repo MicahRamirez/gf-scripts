@@ -6,7 +6,7 @@
 // @run-at      document-end
 // @include     https://www.wanikani.com/review/session*
 // @include     http://www.wanikani.com/review/session*
-// @version     0.1.33
+// @version     0.1.40
 // @run-at      document-end
 // @grant       none
 
@@ -17,8 +17,10 @@ const CURRENT_EVENT_ITEM_UPDATE_STRING = "currentItemUpdated";
 // indicator ui styles
 const SRS_INDICATOR_STYLES = "xr-styles";
 const SRS_INDICATOR_CONTAINER_ID = "xr-srsindicator-container";
+const SRS_INDICATOR_DIV_CONTAINER_ID = "xr-srsindicator-div__container";
 const SRS_INDICATOR_DIV_ID = "xr-srsindicator-div";
 const SRS_INDICATOR_TEXT_DIV_ID = 'xr-srsindicatortext-div';
+
 // danger circles styles
 const SRS_DANGER_CIRCLE_DIV_CLASS = "xr-srsdangercircle-div";
 const SRS_DANGER_CIRCLE_ANIMATION_CLASS = 'xr-srsdangercircle__animation';
@@ -54,23 +56,25 @@ const scriptStyles = `
    display: flex;
    justify-content: center;
  }
-
+ #${SRS_INDICATOR_DIV_CONTAINER_ID} {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+ }
  #${SRS_INDICATOR_DIV_ID} {
-   background-color: white;
-   border-radius: 10px;
-   padding: 4px;
+  padding: 4px;
  }
  #${SRS_INDICATOR_TEXT_DIV_ID} {
    display: inline-block;
    color: red;
+   user-select: none;
  }
  #${SRS_TOGGLE_CONTAINER_ID} {
    position:relative;
- }
- #${SRS_TOGGLE_DIV_ID} {
-   position:absolute;
-   top: -38px;
-   left: 82px;
+   border-top: solid;
+   background-color: #e0e2e0;
+   padding-top: 1px;
+   padding-bottom: 1px;
  }
  .${SRS_DANGER_CIRCLE_DIV_CLASS} {
   width: 5px;
@@ -143,8 +147,8 @@ const createToggleCheckbox = () => {
   const toggleInputLabel = document.createElement('label');
   toggleInputLabel.setAttribute('for', SRS_TOGGLE_INPUT_ID);
   toggleInputLabel.textContent = 'Flashing';
-  toggleDiv.appendChild(toggleInputLabel);
   toggleDiv.appendChild(toggleInput);
+  toggleDiv.appendChild(toggleInputLabel);
   toggleContainer.appendChild(toggleDiv);
 
   return toggleContainer;
@@ -160,10 +164,13 @@ const getOrCreateSRSIndicatorNode = (srsLevelNumber) => {
   const srsDangerCircleSpanOne = document.createElement('div');
   const srsDangerCircleSpanTwo = document.createElement('div');
 
+  const srsIndicatorDivContainer = document.createElement('div');
   const srsIndicatorDiv = document.createElement("div");
   const srsIndicatorSpan = document.createElement('div');
 
+
   // set ids for style
+  srsIndicatorDivContainer.setAttribute('id', SRS_INDICATOR_DIV_CONTAINER_ID);
   srsIndicatorContainer.setAttribute("id", SRS_INDICATOR_CONTAINER_ID);
   srsIndicatorDiv.setAttribute("id", SRS_INDICATOR_DIV_ID);
   srsIndicatorSpan.setAttribute('id', SRS_INDICATOR_TEXT_DIV_ID);
@@ -181,16 +188,17 @@ const getOrCreateSRSIndicatorNode = (srsLevelNumber) => {
   srsIndicatorDiv.appendChild(srsDangerCircleSpanOne);
   srsIndicatorDiv.appendChild(srsIndicatorSpan);
   srsIndicatorDiv.appendChild(srsDangerCircleSpanTwo);
+  srsIndicatorDivContainer.appendChild(srsIndicatorDiv);
 
   srsIndicatorDiv.addEventListener('click', (event) => {
     if (!document.getElementById(SRS_TOGGLE_CONTAINER_ID)) {
       const toggle = createToggleCheckbox();
-      srsIndicatorDiv.appendChild(toggle);
+      srsIndicatorDivContainer.appendChild(toggle);
     } else {
       document.getElementById(SRS_TOGGLE_CONTAINER_ID).remove();
     }
   });
-  srsIndicatorContainer.appendChild(srsIndicatorDiv);
+  srsIndicatorContainer.appendChild(srsIndicatorDivContainer);
 
   // return parent node
   return srsIndicatorContainer;
@@ -214,7 +222,7 @@ const main = () => {
       return srsIndicatorDivNode && srsIndicatorDivNode.remove();
     }
     const srsIndicatorDivNode = getOrCreateSRSIndicatorNode();
-    srsIndicatorDivNode.children[0].children[1].textContent =
+    srsIndicatorDivNode.children[0].children[0].children[1].textContent =
       CASE_MAP[e.detail.srsLevelNumber].copy;
 
     targetParent.appendChild(srsIndicatorDivNode);
